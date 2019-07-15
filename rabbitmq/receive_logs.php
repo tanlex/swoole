@@ -2,18 +2,18 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2019/7/12
- * Time: 15:46
+ * Date: 2019/7/15
+ * Time: 15:50
  */
 
 /**
- * 参考：https://laravelacademy.org/post/7410.html
+ * 参考：https://laravelacademy.org/post/7420.html
  * 接收消息
+ * 1:php receive_logs.php > logs_from_rabbit.log
+ * 2:php receive_logs.php
  */
 
-$exchangeName = 'demo';
-$queueName = 'hello';
-$routeKey = 'hello';
+$exchangeName = 'mylogs';
 
 // 建立TCP连接
 $connection = new AMQPConnection([
@@ -29,16 +29,13 @@ $channel = new AMQPChannel($connection);
 
 $exchange = new AMQPExchange($channel);
 $exchange->setName($exchangeName);
-$exchange->setType(AMQP_EX_TYPE_DIRECT);
-
-echo 'Exchange Status: ' . $exchange->declareExchange() . "\n";
+$exchange->setType(AMQP_EX_TYPE_FANOUT);
+$exchange->declareExchange();
 
 $queue = new AMQPQueue($channel);
-$queue->setName($queueName);
-
-echo 'Message Total: ' . $queue->declareQueue() . "\n";
-
-echo 'Queue Bind: ' . $queue->bind($exchangeName, $routeKey) . "\n";
+$queue->setFlags(AMQP_EXCLUSIVE);
+$queue->declareQueue();
+$queue->bind($exchangeName);
 
 var_dump("Waiting for message...");
 
@@ -52,7 +49,6 @@ $connection->disconnect();
 
 function processMessage($envelope, $queue) {
     $msg = $envelope->getBody();
-    var_dump("Received: " . $msg);
+    var_dump(date('YmdHis',time())." :Received: " . $msg);
     $queue->ack($envelope->getDeliveryTag()); // 手动发送ACK应答
 }
-

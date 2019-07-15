@@ -7,6 +7,11 @@
  * Time: 17:33
  */
 
+/**
+ * 参考：https://laravelacademy.org/post/7417.html
+ * 接收消息
+ */
+
 $exchangeName = 'task';
 $queueName = 'worker';
 $routeKey = 'worker';

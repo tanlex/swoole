@@ -2,18 +2,17 @@
 /**
  * Created by PhpStorm.
  * User: Administrator
- * Date: 2019/7/12
- * Time: 15:04
+ * Date: 2019/7/15
+ * Time: 15:38
  */
 
 /**
- * 参考：https://laravelacademy.org/post/7410.html
+ * 参考：https://laravelacademy.org/post/7420.html
  * 发送消息
  */
 
-$exchangeName = 'demo';
-$routeKey = 'hello';
-$message = 'Hello World To!';
+$exchangeName = 'mylogs';
+$message = 'Hello World!';
 
 // 建立TCP连接
 $connection = new AMQPConnection([
@@ -24,17 +23,16 @@ $connection = new AMQPConnection([
     'password' => 'zhiyuan'
 ]);
 $connection->connect() or die("Cannot connect to the broker!\n");
-//var_dump($connection);exit;
 
 try {
     $channel = new AMQPChannel($connection);
-    $exchange = new AMQPExchange($channel);
 
+    $exchange = new AMQPExchange($channel);
     $exchange->setName($exchangeName);
-    $exchange->setType(AMQP_EX_TYPE_DIRECT);
+    $exchange->setType(AMQP_EX_TYPE_FANOUT); //fanout 就是广播模式，会将 Message 都放到它所知道的所有 Queue 中
     $exchange->declareExchange();
 
-    echo 'Send Message: ' . $exchange->publish($message, $routeKey) . "\n";
+    echo 'Send Message: ' . $exchange->publish($message) . "\n";
     echo "Message Is Sent: " . $message . "\n";
 } catch (AMQPConnectionException $e) {
     var_dump($e);
